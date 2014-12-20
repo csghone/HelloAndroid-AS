@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MainActivity</string>
+    <string name="edit_message">Type Here</string>
+    <string name="my_button_text">My Button</string>
+    <string name="chk_box_txt">Chk</string>
+
+    <string name="tempStr">TempString</string>
+
+
+    <color name="primary">#ffC00000</color>
+    <color name="primary_dark">#ff800000</color>
+    <color name="accent">#fffff000</color>
+</resources>
