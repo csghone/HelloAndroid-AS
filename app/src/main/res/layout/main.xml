@@ -6,28 +6,10 @@
     android:layout_height="fill_parent"
     style="@style/AppTheme"
     >
-    <!-- The main content view -->
-    <RelativeLayout
-        android:id="@+id/content_frame"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        style="@style/AppTheme">
-
-    <EditText android:id="@+id/edit_message"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/edit_message" />
-
-    <Button android:id="@+id/my_button"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/edit_message"
-        android:text="@string/my_button_text"/>
-    </RelativeLayout>
-
 
     <!-- The navigation drawer -->
-    <ListView android:id="@+id/left_drawer"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/left_drawer"
         android:layout_width="240dp"
         android:layout_height="match_parent"
         android:layout_gravity="left|start"

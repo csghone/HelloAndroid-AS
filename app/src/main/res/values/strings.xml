@@ -1,15 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">MainActivity</string>
     <string name="edit_message">Type Here</string>
     <string name="my_button_text">My Button</string>
     <string name="chk_box_txt">Chk</string>
-
-    <string name="tempStr">TempString</string>\
-    <string name="tempStr1">TempString1</string>\
-    <string name="tempStr2">TempString2</string>\
+    <string name="tempStr">TempString</string>
+\    <string name="tempStr1">TempString1</string>
+\    <string name="tempStr2">TempString2</string>
+\    <string-array name="drawer_menu">
+        <item>Entry1</item>
+        <item>Entry2</item>
+        <item>Entry3</item>
+    </string-array>
 
     <color name="primary">#ffc00000</color>
     <color name="primary_dark">#ff800000</color>
     <color name="accent">#fffff000</color>
+
+    <string name="title_activity_activity_layout1">ActivityLayout1</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
 </resources>
