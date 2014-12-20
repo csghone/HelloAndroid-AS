@@ -5,10 +5,11 @@
     <string name="my_button_text">My Button</string>
     <string name="chk_box_txt">Chk</string>
 
-    <string name="tempStr">TempString</string>
+    <string name="tempStr">TempString</string>\
+    <string name="tempStr1">TempString1</string>\
+    <string name="tempStr2">TempString2</string>\
 
-
-    <color name="primary">#ffC00000</color>
+    <color name="primary">#ffc00000</color>
     <color name="primary_dark">#ff800000</color>
     <color name="accent">#fffff000</color>
 </resources>

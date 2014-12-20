@@ -2,13 +2,16 @@
 <android.support.v4.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/drawer_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    style="@style/AppTheme"
+    >
     <!-- The main content view -->
     <RelativeLayout
         android:id="@+id/content_frame"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        style="@style/AppTheme">
 
     <EditText android:id="@+id/edit_message"
         android:layout_width="fill_parent"
@@ -22,13 +25,13 @@
         android:text="@string/my_button_text"/>
     </RelativeLayout>
 
+
     <!-- The navigation drawer -->
     <ListView android:id="@+id/left_drawer"
-        android:layout_width="120dp"
+        android:layout_width="240dp"
         android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:choiceMode="singleChoice"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="0dp"
-        android:background="#111"/>
+        android:layout_gravity="left|start"
+        android:divider="@android:color/black"
+        android:background="@android:color/black"
+        style="@style/AppTheme" />
 </android.support.v4.widget.DrawerLayout>
