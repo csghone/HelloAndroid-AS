@@ -9,10 +9,12 @@
         android:minSdkVersion="21"
         android:targetSdkVersion="21" />
 
-    <android:uses-permission
-        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="18" />
     <android:uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <android:uses-permission android:name="android.permission.CAMERA" />
+    <android:uses-feature android:name="android.hardware.camera" />
+    <android:uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <android:uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <android:uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="18" />

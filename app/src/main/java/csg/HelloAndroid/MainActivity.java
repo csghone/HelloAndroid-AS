@@ -26,6 +26,7 @@ public class MainActivity
     private RecyclerView.Adapter myAdapter;
     private RecyclerView.LayoutManager myLayoutManager;
     private BlankFragment_1 myFragment1;
+    private Camera2VideoFragment myCamFrag;
     private Fragment curFragment;
 
     /** Called when the activity is first created. */
@@ -37,6 +38,7 @@ public class MainActivity
 
         // update the main content by replacing fragments
         myFragment1 = BlankFragment_1.newInstance("Hello", "World");
+        myCamFrag= Camera2VideoFragment.newInstance();
         curFragment = null;
 
 
@@ -130,6 +132,11 @@ public class MainActivity
                 if(curFragment != null)
                 ft.remove(curFragment);
                 ft.commit();
+                break;
+            case 1:
+                ft.replace(R.id.main_activity_content, myCamFrag);
+                ft.commit();
+                curFragment = myCamFrag;
                 break;
             case 2:
                 ft.replace(R.id.main_activity_content, myFragment1);
