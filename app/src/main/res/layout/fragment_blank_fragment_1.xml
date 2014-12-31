@@ -8,7 +8,9 @@
     <EditText android:id="@+id/edit_message"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/edit_message" />
+        android:hint="@string/edit_message"
+        android:autoText="false"
+        android:inputType="numberDecimal" />
 
     <Button android:id="@+id/my_button"
         android:layout_width="fill_parent"
@@ -16,5 +18,13 @@
         android:layout_below="@+id/edit_message"
         android:text="@string/my_button_text"
         android:layout_gravity="right|top" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/lxTextView"
+        android:layout_below="@+id/my_button"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

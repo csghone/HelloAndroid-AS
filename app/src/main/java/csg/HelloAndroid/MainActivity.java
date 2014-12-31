@@ -36,7 +36,7 @@ public class MainActivity
         setContentView(R.layout.main);
 
         // update the main content by replacing fragments
-        myFragment1 = BlankFragment_1.newInstance("Hello", "World");
+        myFragment1 = BlankFragment_1.newInstance(this, "World");
         curFragment = null;
 
 
