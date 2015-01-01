@@ -203,6 +203,8 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
     @Override
     public void onDetach() {
         super.onDetach();
+        snsMgr.unregisterListener(this);
+        pS = null;
         mListener = null;
     }
 
