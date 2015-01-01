@@ -10,16 +10,16 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
-import static csg.HelloAndroid.R.raw.buzz;
 
 
 /**
@@ -42,26 +42,68 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
 
     private Context mContext;
     private MediaPlayer mPlayer;
+    private float lastReading[];
+    private int lastReadingIdx;
     private int buzzThreshold;
     private static int initDone = 0;
+    private Sensor pS;
+    private SensorManager snsMgr;
+    private float lxSensorVal[];
 
     private OnFragmentInteractionListener mListener;
+
+    private class myAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            while(1==1)
+            {
+                SystemClock.sleep(100);
+                lxSensorVal = lowPass(lastReading.clone(), lxSensorVal);
+                float chkVal = lxSensorVal[0];
+                if(chkVal < buzzThreshold)
+                {
+                    mPlayer.start();
+                }
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+        }
+    }
+
+    private myAsyncTask bgTsk;
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
+    static final float ALPHA = 0.25f;
+    protected float[] lowPass( float[] input, float[] output ) {
+        if ( output == null ) return input;
+        for ( int i=0; i<input.length; i++ ) {
+            output[i] = output[i] + ALPHA * (input[i] - output[i]);
+        }
+        return output;
+    }
+
     @Override
     public void onSensorChanged(SensorEvent event) {
+        int lpArray = getResources().getInteger(R.integer.lpArray);
         float[] values = event.values;
         TextView tV = (TextView) getActivity().findViewById(R.id.lxTextView);
-        tV.setText("" + values[0]);
         if(initDone == 0)
         {
             initDone = 1;
             addListenerOnButton();
         }
-        if(values[0] < buzzThreshold)
+        lastReading = values.clone();
+        lxSensorVal = lowPass(values.clone(), lxSensorVal);
+        float chkVal = lxSensorVal[0];
+        tV.setText("" + chkVal);
+        if(chkVal < buzzThreshold)
         {
             mPlayer.start();
         }
@@ -85,6 +127,13 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
         fragment.mContext = param1;
         fragment.mPlayer = MediaPlayer.create(param1, R.raw.buzz);
         fragment.buzzThreshold = 1;
+        fragment.lastReadingIdx = 0;
+        int i, lpArray = param1.getResources().getInteger(R.integer.lpArray);
+        fragment.lastReading = new float[lpArray];
+        for(i=0; i<lpArray; i++)
+        {
+            fragment.lastReading[i] = (float)-1;
+        }
         return fragment;
     }
 
@@ -99,9 +148,12 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-        SensorManager snsMgr = (SensorManager) mContext.getSystemService(Service.SENSOR_SERVICE);
-        Sensor pS = snsMgr.getDefaultSensor(Sensor.TYPE_LIGHT);
+        snsMgr = (SensorManager) mContext.getSystemService(Service.SENSOR_SERVICE);
+        pS = snsMgr.getDefaultSensor(Sensor.TYPE_LIGHT);
         snsMgr.registerListener(this, pS, SensorManager.SENSOR_DELAY_UI);
+
+        bgTsk = new myAsyncTask();
+        bgTsk.execute();
     }
 
     @Override

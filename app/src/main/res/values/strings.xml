@@ -18,6 +18,8 @@
     <color name="primary_dark">#ff800000</color>
     <color name="accent">#fffff000</color>
 
+    <integer name="lpArray">3</integer>
+
     <string name="title_activity_activity_layout1">ActivityLayout1</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
