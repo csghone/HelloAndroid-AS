@@ -118,22 +118,12 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
      * @return A new instance of fragment BlankFragment_1.
      */
     // TODO: Rename and change types and number of parameters
-    public static BlankFragment_1 newInstance(Context param1, String param2) {
+    public static BlankFragment_1 newInstance(String param1, String param2) {
         BlankFragment_1 fragment = new BlankFragment_1();
         Bundle args = new Bundle();
-        //args.putString(ARG_PARAM1, param1);
+        args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
-        fragment.mContext = param1;
-        fragment.mPlayer = MediaPlayer.create(param1, R.raw.buzz);
-        fragment.buzzThreshold = 1;
-        fragment.lastReadingIdx = 0;
-        int i, lpArray = param1.getResources().getInteger(R.integer.lpArray);
-        fragment.lastReading = new float[lpArray];
-        for(i=0; i<lpArray; i++)
-        {
-            fragment.lastReading[i] = (float)-1;
-        }
         return fragment;
     }
 
@@ -147,11 +137,21 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
+
+            mContext = getActivity();
+            mPlayer = MediaPlayer.create(mContext, R.raw.buzz);
+            buzzThreshold = 1;
+            lastReadingIdx = 0;
+            int i, lpArray = mContext.getResources().getInteger(R.integer.lpArray);
+            lastReading = new float[lpArray];
+            for(i=0; i<lpArray; i++)
+            {
+                lastReading[i] = (float)-1;
+            }
         }
         snsMgr = (SensorManager) mContext.getSystemService(Service.SENSOR_SERVICE);
         pS = snsMgr.getDefaultSensor(Sensor.TYPE_LIGHT);
         snsMgr.registerListener(this, pS, SensorManager.SENSOR_DELAY_UI);
-
         bgTsk = new myAsyncTask();
         bgTsk.execute();
     }
