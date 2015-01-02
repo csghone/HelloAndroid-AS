@@ -80,7 +80,7 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
-    static final float ALPHA = 0.25f;
+    static final float ALPHA = 1;
     protected float[] lowPass( float[] input, float[] output ) {
         if ( output == null ) return input;
         for ( int i=0; i<input.length; i++ ) {
