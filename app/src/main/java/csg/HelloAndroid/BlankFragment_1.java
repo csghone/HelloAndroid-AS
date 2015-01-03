@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -13,13 +14,22 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Environment;
 import android.os.SystemClock;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -45,12 +55,16 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
     private float lastReading[];
     private int lastReadingIdx;
     private int buzzThreshold;
-    private static int initDone = 0;
-    private Sensor pS;
+    private int initDone;
+    private Sensor pS[];
     private SensorManager snsMgr;
     private float lxSensorVal[];
+    private float sensorVals[][];
 
     private OnFragmentInteractionListener mListener;
+    private String logFile;
+    FileOutputStream fOut;
+    private FileOutputStream outputStream;
 
     private class myAsyncTask extends AsyncTask<Void, Void, Void> {
 
@@ -63,7 +77,7 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
                 float chkVal = lxSensorVal[0];
                 if(chkVal < buzzThreshold)
                 {
-                    mPlayer.start();
+                    //mPlayer.start();
                 }
             }
         }
@@ -80,7 +94,7 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
-    static final float ALPHA = 0.25f;
+    static final float ALPHA = 1;
     protected float[] lowPass( float[] input, float[] output ) {
         if ( output == null ) return input;
         for ( int i=0; i<input.length; i++ ) {
@@ -93,19 +107,42 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
     public void onSensorChanged(SensorEvent event) {
         int lpArray = getResources().getInteger(R.integer.lpArray);
         float[] values = event.values;
-        TextView tV = (TextView) getActivity().findViewById(R.id.lxTextView);
         if(initDone == 0)
         {
             initDone = 1;
             addListenerOnButton();
         }
-        lastReading = values.clone();
-        lxSensorVal = lowPass(values.clone(), lxSensorVal);
-        float chkVal = lxSensorVal[0];
-        tV.setText("" + chkVal);
-        if(chkVal < buzzThreshold)
-        {
-            mPlayer.start();
+        int idx = 0;
+        for (Sensor sensor : pS) {
+            if(pS[idx] == event.sensor) break;
+            idx++;
+        }
+        sensorVals[idx] = lowPass(values.clone(), sensorVals[idx]);
+
+        if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            TextView tV = (TextView) getActivity().findViewById(R.id.acclTextView);
+            tV.setText("" + values[0] + " " + values[1] + " " + values[2]);
+            String output = Long.toString(System.currentTimeMillis());
+            output += ", " + values[0] + ", " + values[1] + ", " + values[2] + "\n";
+            if(outputStream != null)
+            {
+                try {
+                    outputStream.write(output.getBytes());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        if(event.sensor.getType() == Sensor.TYPE_LIGHT) {
+            lastReading = values.clone();
+            lxSensorVal = lowPass(values.clone(), lxSensorVal);
+            float chkVal = lxSensorVal[0];
+            TextView tV = (TextView) getActivity().findViewById(R.id.lxTextView);
+            tV.setText("" + chkVal);
+            if(chkVal < buzzThreshold)
+            {
+                //mPlayer.start();
+            }
         }
     }
 
@@ -150,8 +187,16 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
             }
         }
         snsMgr = (SensorManager) mContext.getSystemService(Service.SENSOR_SERVICE);
-        pS = snsMgr.getDefaultSensor(Sensor.TYPE_LIGHT);
-        snsMgr.registerListener(this, pS, SensorManager.SENSOR_DELAY_UI);
+        pS = new Sensor[snsMgr.getSensorList(Sensor.TYPE_ALL).size()];
+        List<Sensor> sensorList = snsMgr.getSensorList(Sensor.TYPE_ALL);
+        sensorVals = new float[snsMgr.getSensorList(Sensor.TYPE_ALL).size()][];
+        int idx = 0;
+        for (Sensor sensor : sensorList) {
+            pS[idx] = sensor;
+            snsMgr.registerListener(this, pS[idx], SensorManager.SENSOR_DELAY_UI);
+            idx++;
+        }
+        initDone = 0;
         bgTsk = new myAsyncTask();
         bgTsk.execute();
     }
@@ -175,18 +220,53 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                EditText eT = (EditText) getActivity().findViewById(R.id.edit_message);
-                if (eT.getText().toString().contentEquals("")) {
-                    buzzThreshold = 100;
+                //Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                //intent.setType("file/*.dat");
+                //startActivityForResult(intent, 1);
+
+                try {
+                    Button button = (Button) arg0;
+                    if(outputStream != null) {
+                        outputStream.close();
+                        outputStream = null;
+                        button.setText(R.string.StartRecording);
+                    }
+                    else {
+                        logFile = Long.toString(System.currentTimeMillis()) + ".txt";
+                        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath(), logFile);
+                        file.createNewFile();
+                        outputStream = new FileOutputStream(file, true);
+                        button.setText(R.string.StopRecording);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                else
-                {
-                    buzzThreshold = Integer.parseInt(eT.getText().toString());
-                }
+
             }
-
         });
+    }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == Activity.RESULT_OK) {
+            Uri resData = data.getData();
+            String FilePath = data.getData().getLastPathSegment();
+            logFile = FilePath;
+            TextView tv = (TextView) getActivity().findViewById(R.id.file_name);
+            tv.setText(FilePath);
+
+            FileOutputStream outputStream;
+
+            try {
+                logFile = Long.toString(System.currentTimeMillis()) + ".txt";
+                File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath(), logFile);
+                file.createNewFile();
+                outputStream = new FileOutputStream(file, true);
+                outputStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override

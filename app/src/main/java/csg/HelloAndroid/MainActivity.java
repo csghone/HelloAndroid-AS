@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
@@ -73,6 +74,12 @@ public class MainActivity
         // specify an adapter (see also next example)
         myAdapter = new MyAdapter(getResources().getStringArray(R.array.drawer_menu), this);
         myRecyclerView.setAdapter(myAdapter);
+
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        ft.replace(R.id.main_activity_content, myFragment1);
+        ft.commit();
+        curFragment = myFragment1;
     }
 
     @Override
@@ -127,16 +134,14 @@ public class MainActivity
         switch (position)
         {
             case 0:
-                if(curFragment != null)
-                ft.remove(curFragment);
-                ft.commit();
-                break;
-            case 2:
                 ft.replace(R.id.main_activity_content, myFragment1);
                 ft.commit();
                 curFragment = myFragment1;
                 break;
             default:
+                if(curFragment != null)
+                    ft.remove(curFragment);
+                ft.commit();
                 break;
         }
         myDrawerLayout.closeDrawer(myRecyclerView);
@@ -149,5 +154,9 @@ public class MainActivity
 
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 }
 
