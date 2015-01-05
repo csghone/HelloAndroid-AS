@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -16,20 +15,17 @@ import android.os.Bundle;
 import android.app.Fragment;
 import android.os.Environment;
 import android.os.SystemClock;
-import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 /**
@@ -56,17 +52,40 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
     private int lastReadingIdx;
     private int buzzThreshold;
     private int initDone;
-    private mySensor pS[];
+    private MySensor pS[];
     private SensorManager snsMgr;
-    private float lxSensorVal[];
     private float sensorVals[][];
+    private int samplingDelay;
+
+    private Timer timer;
+    private MyTimerTask timerTask;
 
     private OnFragmentInteractionListener mListener;
     private String logFile;
     FileOutputStream fOut;
     private FileOutputStream outputStream;
 
-    private class mySensor {
+    private class MyTimerTask extends TimerTask{
+
+        @Override
+        public void run()
+        {
+            if(samplingDelay != SensorManager.SENSOR_DELAY_GAME)
+            {
+                int idx = 0;
+                if(pS != null) {
+                    for (MySensor mySensor : pS) {
+                        if (mySensor.enable == true) {
+                            writeToFile(idx);
+                        }
+                        idx++;
+                    }
+                }
+            }
+        }
+    }
+
+    private class MySensor {
         public Sensor sensor;
         public boolean enable;
         public String name;
@@ -85,13 +104,7 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
         protected Void doInBackground(Void... voids) {
             while(1==1)
             {
-                SystemClock.sleep(100);
-                lxSensorVal = lowPass(lastReading.clone(), lxSensorVal);
-                float chkVal = lxSensorVal[0];
-                if(chkVal < buzzThreshold)
-                {
-                    //mPlayer.start();
-                }
+                SystemClock.sleep(1000);
             }
         }
 
@@ -116,6 +129,25 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
         return output;
     }
 
+    public void writeToFile(int idx)
+    {
+        String output = pS[idx].name ;
+        for (float v : sensorVals[idx]) {
+            output += ", " + v;
+        }
+        output += "\n";
+
+        output = Long.toString(System.currentTimeMillis()) + ", " + output;
+        if(outputStream != null)
+        {
+            try {
+                outputStream.write(output.toString().getBytes());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     @Override
     public void onSensorChanged(SensorEvent event) {
         int lpArray = getResources().getInteger(R.integer.lpArray);
@@ -126,24 +158,17 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
             addListenerOnButton();
         }
         int idx = 0;
-        for (mySensor sensor : pS) {
+        for (MySensor sensor : pS) {
             if(pS[idx].sensor == event.sensor) break;
             idx++;
         }
-        sensorVals[idx] = lowPass(values.clone(), sensorVals[idx]);
 
+        sensorVals[idx] = lowPass(values.clone(), sensorVals[idx]);
         TextView tV = (TextView) getActivity().findViewById(pS[idx].viewId);
         tV.setText(pS[idx].name + ", " + values[0] + ", " + values[1] + ", " + values[2] + "\n");
-        String output = pS[idx].name + ", " + values[0] + ", " + values[1] + ", " + values[2] + "\n";
-        output = Long.toString(System.currentTimeMillis()) + ", " + output;
-        if(outputStream != null)
-        {
-            try {
-                outputStream.write(output.toString().getBytes());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+
+        if(samplingDelay == SensorManager.SENSOR_DELAY_GAME)
+            writeToFile(idx);
     }
 
     /**
@@ -187,12 +212,12 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
             }
         }
         snsMgr = (SensorManager) mContext.getSystemService(Service.SENSOR_SERVICE);
-        pS = new mySensor[snsMgr.getSensorList(Sensor.TYPE_ALL).size()];
+        pS = new MySensor[snsMgr.getSensorList(Sensor.TYPE_ALL).size()];
         List<Sensor> sensorList = snsMgr.getSensorList(Sensor.TYPE_ALL);
         sensorVals = new float[snsMgr.getSensorList(Sensor.TYPE_ALL).size()][];
         int idx = 0;
         for (Sensor sensor : sensorList) {
-            pS[idx] = new mySensor();
+            pS[idx] = new MySensor();
             pS[idx].sensor = sensor;
             switch (sensor.getType())
             {
@@ -218,8 +243,11 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
             idx++;
         }
         initDone = 0;
+        samplingDelay = SensorManager.SENSOR_DELAY_GAME;
         bgTsk = new myAsyncTask();
         bgTsk.execute();
+
+        timerTask = new MyTimerTask();
     }
 
     @Override
@@ -251,8 +279,25 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
                         outputStream.close();
                         outputStream = null;
                         button.setText(R.string.StartRecording);
+                        if(timer != null){
+                            timer.cancel();
+                        }
                     }
                     else {
+                        String text;
+                        TextView tv = (TextView) getActivity().findViewById(R.id.sampleRate);
+                        text = tv.getText().toString();
+                        if(text.equals(""))
+                        {
+                            samplingDelay = SensorManager.SENSOR_DELAY_GAME;
+                        }
+                        else
+                        {
+                            samplingDelay = Integer.parseInt(text);
+                            timer = new Timer();
+                            timerTask = new MyTimerTask();
+                            timer.schedule(timerTask, 100, samplingDelay);
+                        }
                         logFile = Long.toString(System.currentTimeMillis()) + ".txt";
                         File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath(), logFile);
                         file.createNewFile();
@@ -273,7 +318,7 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
             Uri resData = data.getData();
             String FilePath = data.getData().getLastPathSegment();
             logFile = FilePath;
-            TextView tv = (TextView) getActivity().findViewById(R.id.file_name);
+            TextView tv = (TextView) getActivity().findViewById(R.id.gyroTextView);
             tv.setText(FilePath);
 
             FileOutputStream outputStream;

@@ -5,12 +5,30 @@
     android:layout_height="match_parent"
     tools:context="csg.HelloAndroid.BlankFragment_1">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sampleRateDesc"
+        android:id="@+id/idSampleRateDesc"
+        android:gravity="center_horizontal|center_vertical"
+        android:layout_gravity="right|top"
+        android:layout_above="@+id/my_button"
+        android:layout_alignParentTop="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:id="@+id/sampleRate"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@+id/idSampleRateDesc" />
+
     <Button android:id="@+id/my_button"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/file_name"
-        android:text="@string/StartRecording"
-        android:layout_gravity="right|top" />
+        android:layout_below="@+id/sampleRate"
+        android:text="@string/StartRecording" />
 
     <TextView
         android:layout_width="match_parent"
@@ -31,4 +49,5 @@
         android:layout_below="@+id/acclTextView"
         android:layout_alignParentEnd="true"
         android:textAlignment="center" />
+
 </RelativeLayout>

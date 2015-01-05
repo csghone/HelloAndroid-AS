@@ -2,8 +2,8 @@
 <resources>
 
     <string name="app_name">MainActivity</string>
-    <string name="edit_message">Type Here</string>
-    <string name="my_button_text">Set Threshold</string>
+    <string name="sampleRateDesc">Sample Rate in milliseconds</string>
+
     <string name="chk_box_txt">Chk</string>
     <string name="tempStr">TempString</string>
 \            <string name="tempStr1">TempString1</string>
