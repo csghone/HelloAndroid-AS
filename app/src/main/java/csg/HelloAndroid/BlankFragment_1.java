@@ -378,4 +378,24 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
         public void onFragmentInteraction_BlankFragment_1();
     }
 
+    //Allow sensor dump to happen in background, save power otherwise
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        if(outputStream == null) snsMgr.unregisterListener(this);
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        for (MySensor mySensor : pS) {
+            if(outputStream == null) {
+                if(mySensor.enable == true) {
+                    snsMgr.registerListener(this, mySensor.sensor, samplingDelay);
+                }
+            }
+        }
+    }
 }
