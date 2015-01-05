@@ -56,7 +56,7 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
     private int lastReadingIdx;
     private int buzzThreshold;
     private int initDone;
-    private Sensor pS[];
+    private mySensor pS[];
     private SensorManager snsMgr;
     private float lxSensorVal[];
     private float sensorVals[][];
@@ -65,6 +65,19 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
     private String logFile;
     FileOutputStream fOut;
     private FileOutputStream outputStream;
+
+    private class mySensor {
+        public Sensor sensor;
+        public boolean enable;
+        public String name;
+        public int viewId;
+
+        public void mySensor() {
+            sensor = null;
+            enable = false;
+            name = "";
+        }
+    }
 
     private class myAsyncTask extends AsyncTask<Void, Void, Void> {
 
@@ -113,35 +126,22 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
             addListenerOnButton();
         }
         int idx = 0;
-        for (Sensor sensor : pS) {
-            if(pS[idx] == event.sensor) break;
+        for (mySensor sensor : pS) {
+            if(pS[idx].sensor == event.sensor) break;
             idx++;
         }
         sensorVals[idx] = lowPass(values.clone(), sensorVals[idx]);
 
-        if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            TextView tV = (TextView) getActivity().findViewById(R.id.acclTextView);
-            tV.setText("" + values[0] + " " + values[1] + " " + values[2]);
-            String output = Long.toString(System.currentTimeMillis());
-            output += ", " + values[0] + ", " + values[1] + ", " + values[2] + "\n";
-            if(outputStream != null)
-            {
-                try {
-                    outputStream.write(output.getBytes());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        if(event.sensor.getType() == Sensor.TYPE_LIGHT) {
-            lastReading = values.clone();
-            lxSensorVal = lowPass(values.clone(), lxSensorVal);
-            float chkVal = lxSensorVal[0];
-            TextView tV = (TextView) getActivity().findViewById(R.id.lxTextView);
-            tV.setText("" + chkVal);
-            if(chkVal < buzzThreshold)
-            {
-                //mPlayer.start();
+        TextView tV = (TextView) getActivity().findViewById(pS[idx].viewId);
+        tV.setText(pS[idx].name + ", " + values[0] + ", " + values[1] + ", " + values[2] + "\n");
+        String output = pS[idx].name + ", " + values[0] + ", " + values[1] + ", " + values[2] + "\n";
+        output = Long.toString(System.currentTimeMillis()) + ", " + output;
+        if(outputStream != null)
+        {
+            try {
+                outputStream.write(output.toString().getBytes());
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
@@ -187,13 +187,34 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
             }
         }
         snsMgr = (SensorManager) mContext.getSystemService(Service.SENSOR_SERVICE);
-        pS = new Sensor[snsMgr.getSensorList(Sensor.TYPE_ALL).size()];
+        pS = new mySensor[snsMgr.getSensorList(Sensor.TYPE_ALL).size()];
         List<Sensor> sensorList = snsMgr.getSensorList(Sensor.TYPE_ALL);
         sensorVals = new float[snsMgr.getSensorList(Sensor.TYPE_ALL).size()][];
         int idx = 0;
         for (Sensor sensor : sensorList) {
-            pS[idx] = sensor;
-            snsMgr.registerListener(this, pS[idx], SensorManager.SENSOR_DELAY_UI);
+            pS[idx] = new mySensor();
+            pS[idx].sensor = sensor;
+            switch (sensor.getType())
+            {
+                case Sensor.TYPE_ACCELEROMETER:
+                    pS[idx].enable = true;
+                    pS[idx].name = "ACCL";
+                    pS[idx].viewId = R.id.acclTextView;
+                    break;
+                case Sensor.TYPE_GYROSCOPE:
+                    pS[idx].enable = true;
+                    pS[idx].name = "GYRO";
+                    pS[idx].viewId = R.id.gyroTextView;
+                    break;
+                default:
+                    pS[idx].enable = false;
+                    pS[idx].name = "NULL";
+                    break;
+            }
+
+            if(pS[idx].enable) {
+                snsMgr.registerListener(this, pS[idx].sensor, SensorManager.SENSOR_DELAY_GAME);
+            }
             idx++;
         }
         initDone = 0;
