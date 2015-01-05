@@ -66,7 +66,6 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
     private FileOutputStream outputStream;
 
     private class MyTimerTask extends TimerTask{
-
         @Override
         public void run()
         {
@@ -264,6 +263,15 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
         }
     }
 
+    public void reRegisterSensors(){
+        snsMgr.unregisterListener(this);
+        for (MySensor mySensor : pS) {
+            if(mySensor.enable == true) {
+                snsMgr.registerListener(this, mySensor.sensor, samplingDelay);
+            }
+        }
+    }
+
     public void addListenerOnButton() {
         Button button = (Button) getActivity().findViewById(R.id.my_button);
         button.setOnClickListener(new View.OnClickListener() {
@@ -302,6 +310,7 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
                         File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath(), logFile);
                         file.createNewFile();
                         outputStream = new FileOutputStream(file, true);
+                        reRegisterSensors();
                         button.setText(R.string.StopRecording);
                     }
                 } catch (Exception e) {
