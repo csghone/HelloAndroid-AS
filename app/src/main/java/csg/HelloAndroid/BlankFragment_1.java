@@ -9,6 +9,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,7 +20,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -64,6 +67,7 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
     private String logFile;
     FileOutputStream fOut;
     private FileOutputStream outputStream;
+    private File mFile;
 
     private class MyTimerTask extends TimerTask{
         @Override
@@ -285,6 +289,7 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
                     Button button = (Button) arg0;
                     if(outputStream != null) {
                         outputStream.close();
+                        MediaScannerConnection.scanFile(getActivity(), new String[]{mFile.getAbsolutePath()}, null, null);
                         outputStream = null;
                         button.setText(R.string.StartRecording);
                         if(timer != null){
@@ -293,7 +298,7 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
                     }
                     else {
                         String text;
-                        TextView tv = (TextView) getActivity().findViewById(R.id.sampleRate);
+                        EditText tv = (EditText) getActivity().findViewById(R.id.sampleRate);
                         text = tv.getText().toString();
                         if(text.equals(""))
                         {
@@ -306,19 +311,31 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
                             timerTask = new MyTimerTask();
                             timer.schedule(timerTask, 100, samplingDelay);
                         }
-                        logFile = Long.toString(System.currentTimeMillis()) + ".txt";
-                        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath(), logFile);
-                        file.createNewFile();
-                        outputStream = new FileOutputStream(file, true);
+                        EditText fNameTv = (EditText) getActivity().findViewById(R.id.fileName);
+                        logFile = fNameTv.getText().toString();
+                        if(logFile.equals("")) {
+                            logFile = Long.toString(System.currentTimeMillis());
+                        }
+                        logFile = logFile + ".csv";
+                        showToast("Logging to Downloads/" + logFile);
+                        mFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath(), logFile);
+                        mFile.createNewFile();
+                        outputStream = new FileOutputStream(mFile, true);
                         reRegisterSensors();
                         button.setText(R.string.StopRecording);
                     }
                 } catch (Exception e) {
+                    showToast("Cannot open File!");
                     e.printStackTrace();
                 }
 
             }
         });
+    }
+
+    public void showToast(String text){
+        Toast toast = Toast.makeText(mContext, text, Toast.LENGTH_SHORT);
+        toast.show();
     }
 
     @Override
@@ -334,9 +351,9 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
 
             try {
                 logFile = Long.toString(System.currentTimeMillis()) + ".txt";
-                File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath(), logFile);
-                file.createNewFile();
-                outputStream = new FileOutputStream(file, true);
+                mFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath(), logFile);
+                mFile.createNewFile();
+                outputStream = new FileOutputStream(mFile, true);
                 outputStream.close();
             } catch (Exception e) {
                 e.printStackTrace();

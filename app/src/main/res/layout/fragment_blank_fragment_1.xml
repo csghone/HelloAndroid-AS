@@ -6,14 +6,16 @@
     tools:context="csg.HelloAndroid.BlankFragment_1">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:text="@string/sampleRateDesc"
         android:id="@+id/idSampleRateDesc"
-        android:gravity="center_horizontal|center_vertical"
+        android:gravity="right|center_vertical"
         android:layout_gravity="right|top"
-        android:layout_above="@+id/my_button"
-        android:layout_alignParentTop="true" />
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/fileName"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/sampleRate" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -22,13 +24,33 @@
         android:id="@+id/sampleRate"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@+id/idSampleRateDesc" />
+        android:layout_toEndOf="@+id/idFileNameDesc" />
+
+    <TextView
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:text="@string/fileNameDesc"
+        android:id="@+id/idFileNameDesc"
+        android:gravity="right|center_vertical"
+        android:layout_above="@+id/my_button"
+        android:layout_alignTop="@+id/fileName"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/fileName"
+        android:inputType="textUri"
+        android:layout_below="@+id/sampleRate"
+        android:layout_alignEnd="@+id/sampleRate"
+        android:layout_toEndOf="@+id/idFileNameDesc" />
 
     <Button android:id="@+id/my_button"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/sampleRate"
-        android:text="@string/StartRecording" />
+        android:text="@string/StartRecording"
+        android:layout_below="@+id/fileName"
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="match_parent"

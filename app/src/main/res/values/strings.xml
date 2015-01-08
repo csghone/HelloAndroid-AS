@@ -3,6 +3,7 @@
 
     <string name="app_name">MainActivity</string>
     <string name="sampleRateDesc">Sample Rate in milliseconds</string>
+    <string name="fileNameDesc">Filename (.csv will be added by app)</string>
 
     <string name="chk_box_txt">Chk</string>
     <string name="tempStr">TempString</string>
