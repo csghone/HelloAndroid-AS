@@ -276,6 +276,10 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
         }
     }
 
+    public void unRegisterSensors(){
+        snsMgr.unregisterListener(this);
+    }
+
     public void addListenerOnButton() {
         Button button = (Button) getActivity().findViewById(R.id.my_button);
         button.setOnClickListener(new View.OnClickListener() {
@@ -318,6 +322,7 @@ public class BlankFragment_1 extends Fragment implements SensorEventListener {
                         }
                         logFile = logFile + ".csv";
                         showToast("Logging to Downloads/" + logFile);
+                        unRegisterSensors();
                         mFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath(), logFile);
                         mFile.createNewFile();
                         outputStream = new FileOutputStream(mFile, true);
